@@ -14,10 +14,18 @@ if ! git rev-parse --is-inside-work-tree &>/dev/null; then
 fi
 
 is_issue=0
+is_pulls=0
 
 # If the first argument is 'issue', we want to load the issue page
 if [[ "$1" == 'issue' ]]; then
   is_issue=1
+
+  # Allow the user to provide other args, aka `git open issue upstream 79`
+  shift
+
+# If the first argument is 'pulls', we want to load the pulls page
+elif [[ "$1" == 'pulls' ]]; then
+  is_pulls=1
 
   # Allow the user to provide other args, aka `git open issue upstream 79`
   shift
@@ -56,6 +64,9 @@ IFS='/' pathargs=($urlpath)
 if (( is_issue )); then
   # For issues, take the numbers and preprend 'issues/'
   providerBranchRef="issues/${branch//[^0-9]/}"
+elif (( is_pulls )); then
+# For pulls, take the numbers and preprend 'pulls/'
+  providerBranchRef="pulls/${branch//[^0-9]/}"
 else
   # Make # and % characters url friendly
   #   github.com/paulirish/git-open/pull/24
@@ -78,9 +89,9 @@ fi
 openurl="https://$server/$urlpath"
 
 # simplify URL for master
-if [[ $branch != "master" ]]; then
+# if [[ $branch != "master" ]]; then
     openurl="$openurl/$providerBranchRef"
-fi
+# fi
 
 # get current open browser command
 case $( uname -s ) in
